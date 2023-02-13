@@ -8,7 +8,6 @@ const renderError = function (msg) {
 };
 
 const renderCountry = function (data, className = '') {
-  console.log(data);
   const html = `
     <article class="country ${className}">
             <img class="country__img" src='${data.flags.png}'/>
@@ -59,8 +58,32 @@ const getCountryData = function (country) {
     .finally(() => (countriesContainer.style.opacity = 1));
 };
 
+const whereAmI = function (latitude, longitude) {
+  fetch(
+    `https://geocode.xyz/${latitude},${longitude}?geoit=json&auth=601054561012673896073x106827`
+  )
+    .then(response => {
+      if (!response.ok)
+        throw new Error('more then 10 request at one sec+++++++++++');
+      return response.json();
+    })
+    .then(data => {
+      console.log(data);
+      console.log(`You are in ${data.city}, ${data.country}`);
+      return fetch(`https://restcountries.com/v3.1/name/${data.country}`);
+    })
+    .then(response => {
+      if (!response.ok)
+        throw new Error(`Country not found (${response.status})`);
+      return response.json();
+    })
+    .then(data => renderCountry(...data))
+    .catch(err => console.error(err.message));
+};
+
 btn.addEventListener('click', function () {
   getCountryData('algeria');
+  whereAmI(52.508, 13.381);
 });
 
 //OLDEST FUNCTIONALITY

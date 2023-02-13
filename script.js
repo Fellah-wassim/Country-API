@@ -63,28 +63,48 @@ const renderCountry = function (data, className = '') {
   countriesContainer.style.opacity = 1;
 };
 
-const getCountryNeighbor = function (country) {
-  const request = new XMLHttpRequest();
-  request.open(
-    'GET',
-    `https://restcountries.com/v3.1/name/${country}?fullText=true`
-  );
-  request.send();
-  request.addEventListener('load', function () {
-    const [data] = JSON.parse(request.responseText);
-    renderCountry(data);
-    const [neighbor] = data.borders;
-    if (!neighbor) return;
-    const request2 = new XMLHttpRequest();
-    request2.open(
-      'GET',
-      `https://restcountries.com/v3.1/alpha/${neighbor}?fullText=true`
-    );
-    request2.send();
-    request2.addEventListener('load', function () {
-      const [data2] = JSON.parse(request2.responseText);
-      renderCountry(data2, 'neighbor');
+// const getCountryNeighbor = function (country) {
+//   const request = new XMLHttpRequest();
+//   request.open(
+//     'GET',
+//     `https://restcountries.com/v3.1/name/${country}?fullText=true`
+//   );
+//   request.send();
+//   request.addEventListener('load', function () {
+//     const [data] = JSON.parse(request.responseText);
+//     renderCountry(data);
+//     const [neighbor] = data.borders;
+//     if (!neighbor) return;
+//     const request2 = new XMLHttpRequest();
+//     request2.open(
+//       'GET',
+//       `https://restcountries.com/v3.1/alpha/${neighbor}?fullText=true`
+//     );
+//     request2.send();
+//     request2.addEventListener('load', function () {
+//       const [data2] = JSON.parse(request2.responseText);
+//       renderCountry(data2, 'neighbor');
+//     });
+//   });
+// };
+// getCountryNeighbor('algeria');
+
+const getCountryData = function (country) {
+  fetch(`https://restcountries.com/v3.1/name/${country}?fullText=true`)
+    .then(response => response.json())
+    .then(data => {
+      renderCountry(data[0]);
+      const neighbor = data[0].borders;
+      if (!neighbor) return;
+      console.log(neighbor[0]);
+      return fetch(
+        `https://restcountries.com/v3.1/alpha/${neighbor[0]}?fullText=true`
+      );
+    })
+    .then(response => response.json())
+    .then(neighborData => {
+      renderCountry(...neighborData, 'neighbor');
     });
-  });
 };
-getCountryNeighbor('algeria');
+
+getCountryData('germany');
